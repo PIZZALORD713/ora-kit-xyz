@@ -1,0 +1,1697 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Orakit CMP Preview</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23111318'/%3E%3Ccircle cx='32' cy='32' r='19' fill='%23f2c14e'/%3E%3Ccircle cx='25' cy='28' r='4' fill='%23111318'/%3E%3Ccircle cx='39' cy='28' r='4' fill='%23111318'/%3E%3C/svg%3E">
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #111318;
+        --panel: #1c2028;
+        --panel-2: #232936;
+        --line: #343b49;
+        --text: #f4f1e8;
+        --muted: #aeb6c4;
+        --gold: #f2c14e;
+        --green: #62c370;
+        --red: #d95d39;
+        --cyan: #5bc0eb;
+        --ink: #08090c;
+        --shadow: 0 18px 50px rgba(0, 0, 0, 0.32);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        background: var(--bg);
+        color: var(--text);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        letter-spacing: 0;
+      }
+
+      body.modal-open {
+        overflow: hidden;
+      }
+
+      button,
+      input {
+        font: inherit;
+      }
+
+      button:disabled {
+        cursor: not-allowed;
+        opacity: 0.62;
+      }
+
+      .app {
+        min-height: 100dvh;
+        background:
+          radial-gradient(circle at 14% 8%, rgba(242, 193, 78, 0.14), transparent 30%),
+          radial-gradient(circle at 88% 18%, rgba(91, 192, 235, 0.12), transparent 26%),
+          var(--bg);
+      }
+
+      .nav {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        border-bottom: 1px solid var(--line);
+        background: rgba(23, 26, 33, 0.95);
+        box-shadow: 0 18px 50px rgba(0, 0, 0, 0.22);
+        backdrop-filter: blur(18px);
+      }
+
+      .nav-inner {
+        width: min(1280px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 12px 0;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: fit-content;
+      }
+
+      .brand-mark {
+        width: 42px;
+        height: 42px;
+        border: 2px solid var(--gold);
+        border-radius: 16px;
+        display: grid;
+        place-items: center;
+        color: var(--gold);
+        background: var(--ink);
+        font-weight: 900;
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+      }
+
+      .brand h1 {
+        margin: 0;
+        font-size: 24px;
+        line-height: 1.1;
+        font-weight: 900;
+      }
+
+      .brand p {
+        margin: 3px 0 0;
+        color: var(--muted);
+        font-size: 12px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .nav-search {
+        flex: 1;
+        min-width: 220px;
+        max-width: 620px;
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: rgba(28, 32, 40, 0.96);
+        padding: 6px;
+      }
+
+      .nav-search span {
+        color: var(--gold);
+        font-size: 12px;
+        font-weight: 900;
+        text-transform: uppercase;
+        padding-left: 10px;
+        white-space: nowrap;
+      }
+
+      .nav-search input {
+        min-width: 0;
+        flex: 1;
+        height: 36px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: #0d1016;
+        color: var(--text);
+        padding: 0 12px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+        font-weight: 800;
+      }
+
+      .nav-search button {
+        border: 0;
+        border-radius: 10px;
+        background: var(--gold);
+        color: var(--ink);
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 950;
+        padding: 9px 12px;
+      }
+
+      .wallet-pill {
+        border: 1px solid var(--green);
+        border-radius: 999px;
+        color: var(--green);
+        padding: 9px 12px;
+        font-size: 12px;
+        font-weight: 900;
+        white-space: nowrap;
+      }
+
+      .main {
+        width: min(1280px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 42px 0 58px;
+      }
+
+      .hero {
+        padding: 18px 0 36px;
+        text-align: center;
+      }
+
+      .hero-kicker {
+        width: fit-content;
+        margin: 0 auto 18px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: var(--panel);
+        color: var(--gold);
+        padding: 9px 14px;
+        font-size: 12px;
+        font-weight: 900;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+      }
+
+      .hero h2 {
+        margin: 0;
+        color: var(--text);
+        font-size: clamp(46px, 8vw, 92px);
+        line-height: 0.95;
+        font-weight: 950;
+      }
+
+      .hero h2 span {
+        display: block;
+        color: var(--gold);
+      }
+
+      .hero-copy {
+        max-width: 720px;
+        margin: 18px auto 0;
+        color: var(--muted);
+        font-size: clamp(16px, 2vw, 20px);
+        line-height: 1.5;
+        font-weight: 600;
+      }
+
+      .hero-search-wrap {
+        position: relative;
+        max-width: 1040px;
+        margin: 32px auto 0;
+      }
+
+      .hero-search-wrap::before {
+        content: "";
+        position: absolute;
+        inset: -14px;
+        border-radius: 42px;
+        background: rgba(242, 193, 78, 0.2);
+        filter: blur(18px);
+      }
+
+      .hero-search {
+        position: relative;
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        gap: 12px;
+        align-items: center;
+        border: 2px solid var(--gold);
+        border-radius: 36px;
+        background: rgba(23, 26, 33, 0.98);
+        padding: 14px;
+        box-shadow: var(--shadow);
+      }
+
+      .search-token {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        background: var(--ink);
+        padding: 12px 14px;
+        text-align: left;
+      }
+
+      .search-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 18px;
+        display: grid;
+        place-items: center;
+        background: var(--panel);
+        color: var(--gold);
+        font-size: 22px;
+        font-weight: 900;
+      }
+
+      .search-token span {
+        display: block;
+        color: var(--gold);
+        font-size: 10px;
+        font-weight: 900;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+
+      .search-token strong {
+        display: block;
+        margin-top: 3px;
+        font-size: 15px;
+      }
+
+      .hero-input {
+        width: 100%;
+        height: 76px;
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        background: #0d1016;
+        color: var(--text);
+        padding: 0 20px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+        font-size: clamp(24px, 4vw, 46px);
+        font-weight: 900;
+        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.2);
+      }
+
+      .hero-input:focus {
+        outline: 2px solid rgba(242, 193, 78, 0.5);
+      }
+
+      .hero-actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      .collection-bar {
+        margin-bottom: 18px;
+        border-bottom: 1px solid var(--line);
+        padding-bottom: 18px;
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 18px;
+      }
+
+      .collection-bar h2 {
+        margin: 0;
+        color: var(--gold);
+        font-size: clamp(30px, 4vw, 46px);
+        line-height: 1;
+        font-weight: 950;
+      }
+
+      .collection-bar p {
+        margin: 9px 0 0;
+        color: var(--muted);
+        font-weight: 600;
+      }
+
+      .collection-stats {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 8px;
+      }
+
+      .stat-pill {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: var(--panel);
+        color: var(--muted);
+        padding: 9px 12px;
+        font-size: 13px;
+        font-weight: 800;
+      }
+
+      .stat-pill.ready {
+        border-color: var(--green);
+        color: var(--green);
+      }
+
+      .toolbar {
+        display: grid;
+        gap: 8px;
+      }
+
+      .file-control {
+        position: relative;
+        display: inline-grid;
+        place-items: center;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: var(--panel);
+        color: var(--text);
+        padding: 11px 12px;
+        cursor: pointer;
+        text-align: center;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .file-control input {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        cursor: pointer;
+      }
+
+      .tool-button {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: var(--panel);
+        color: var(--text);
+        padding: 11px 12px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .tool-button:hover,
+      .file-control:hover {
+        border-color: var(--gold);
+        background: var(--panel-2);
+      }
+
+      .primary-action {
+        border-color: var(--gold);
+        background: var(--gold);
+        color: var(--ink);
+        font-weight: 950;
+      }
+
+      .primary-action:hover {
+        border-color: #ffd76a;
+        background: #ffd76a;
+      }
+
+      .search-button {
+        min-width: 126px;
+      }
+
+      .search-status {
+        margin: 0 0 18px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: rgba(28, 32, 40, 0.82);
+        color: var(--muted);
+        padding: 13px 15px;
+        font-weight: 700;
+      }
+
+      .search-status.error {
+        border-color: rgba(217, 93, 57, 0.7);
+        color: #ffb09a;
+      }
+
+      .search-status.success {
+        border-color: rgba(98, 195, 112, 0.6);
+        color: var(--green);
+      }
+
+      .fail-state {
+        display: grid;
+        grid-template-columns: minmax(240px, 420px) minmax(0, 1fr);
+        gap: 18px;
+        align-items: center;
+        margin: 0 0 28px;
+        border: 1px solid rgba(217, 93, 57, 0.5);
+        border-radius: 10px;
+        background: rgba(28, 32, 40, 0.86);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+
+      .fail-state img {
+        width: 100%;
+        height: 100%;
+        min-height: 240px;
+        object-fit: cover;
+        display: block;
+        background: #111318;
+      }
+
+      .fail-copy {
+        padding: 22px 22px 22px 0;
+      }
+
+      .fail-copy h3 {
+        margin: 0;
+        color: var(--gold);
+        font-size: clamp(28px, 4vw, 48px);
+        line-height: 0.95;
+        font-weight: 950;
+      }
+
+      .fail-copy p {
+        margin: 12px 0 0;
+        color: var(--muted);
+        font-size: 16px;
+        line-height: 1.55;
+        font-weight: 650;
+      }
+
+      .fail-copy code {
+        color: var(--text);
+        overflow-wrap: anywhere;
+      }
+
+      .ora-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 16px;
+        margin-bottom: 28px;
+      }
+
+      .ora-card {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        overflow: hidden;
+        background: #eef3f8;
+        color: #101319;
+        box-shadow: 0 16px 36px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+        transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+      }
+
+      .ora-card:hover,
+      .ora-card.is-selected {
+        border-color: var(--gold);
+        box-shadow: 0 18px 42px rgba(242, 193, 78, 0.18);
+        transform: translateY(-2px);
+      }
+
+      .ora-art {
+        aspect-ratio: 1;
+        display: grid;
+        place-items: center;
+        background: #d9e7ef;
+        overflow: hidden;
+      }
+
+      .ora-art img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+
+      .ora-card-body {
+        padding: 12px;
+      }
+
+      .ora-title-row {
+        display: flex;
+        align-items: start;
+        justify-content: space-between;
+        gap: 8px;
+      }
+
+      .ora-title-row h3 {
+        margin: 0;
+        color: #0f172a;
+        font-size: 15px;
+        line-height: 1.15;
+        font-weight: 950;
+      }
+
+      .ora-token {
+        color: #64748b;
+        font-size: 11px;
+        font-weight: 800;
+      }
+
+      .trait-stack {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin: 10px 0 12px;
+      }
+
+      .trait-pill {
+        border-radius: 999px;
+        background: #dcfce7;
+        color: #166534;
+        padding: 4px 7px;
+        font-size: 10px;
+        font-weight: 850;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .trait-pill:nth-child(2n) {
+        background: #dbeafe;
+        color: #1d4ed8;
+      }
+
+      .trait-pill:nth-child(3n) {
+        background: #fef3c7;
+        color: #92400e;
+      }
+
+      .ora-actions {
+        display: grid;
+        gap: 7px;
+      }
+
+      .ora-actions a,
+      .ora-actions button {
+        border: 1px solid #cbd5e1;
+        border-radius: 7px;
+        background: white;
+        color: #1e293b;
+        cursor: pointer;
+        padding: 8px;
+        text-align: center;
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 850;
+      }
+
+      .ora-actions button {
+        border-color: #7c3aed;
+        background: #8b5cf6;
+        color: white;
+      }
+
+      .preview-note {
+        margin-top: 9px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+        color: #64748b;
+        font-size: 10px;
+        font-weight: 800;
+      }
+
+      .preview-note span {
+        border: 1px solid #dbe3ec;
+        border-radius: 6px;
+        background: #f8fafc;
+        padding: 6px;
+      }
+
+      .preview-section {
+        margin: 0;
+      }
+
+      .preview-heading {
+        margin: 0 0 14px;
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 16px;
+      }
+
+      .preview-heading h2 {
+        margin: 0;
+        font-size: clamp(24px, 3vw, 36px);
+        line-height: 1;
+        font-weight: 950;
+      }
+
+      .preview-heading p {
+        margin: 6px 0 0;
+        color: var(--muted);
+        font-weight: 650;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+
+      .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(8, 9, 12, 0.76);
+        backdrop-filter: blur(14px);
+        padding: 22px;
+      }
+
+      .modal-panel {
+        width: min(1240px, 100%);
+        max-height: calc(100dvh - 44px);
+        overflow: auto;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background:
+          radial-gradient(circle at 10% 0%, rgba(242, 193, 78, 0.12), transparent 30%),
+          #111318;
+        box-shadow: 0 28px 80px rgba(0, 0, 0, 0.58);
+      }
+
+      .modal-top {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        display: flex;
+        align-items: start;
+        justify-content: space-between;
+        gap: 16px;
+        border-bottom: 1px solid var(--line);
+        background: rgba(17, 19, 24, 0.96);
+        backdrop-filter: blur(16px);
+        padding: 18px;
+      }
+
+      .modal-top h2 {
+        margin: 4px 0 6px;
+        font-size: clamp(24px, 3vw, 34px);
+        line-height: 1;
+        font-weight: 950;
+      }
+
+      .modal-top p {
+        margin: 0;
+        max-width: 720px;
+        color: var(--muted);
+        font-weight: 650;
+        line-height: 1.45;
+      }
+
+      .modal-body {
+        padding: 18px;
+      }
+
+      .close-button {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: var(--panel);
+        color: var(--text);
+        cursor: pointer;
+        flex: 0 0 auto;
+        padding: 10px 13px;
+        font-size: 13px;
+        font-weight: 900;
+      }
+
+      .close-button:hover {
+        border-color: var(--gold);
+        background: var(--panel-2);
+      }
+
+      .meta-list {
+        display: grid;
+        gap: 8px;
+      }
+
+      .meta-row {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 10px;
+        background: var(--panel-2);
+      }
+
+      .meta-row span {
+        display: block;
+        color: var(--muted);
+        font-size: 11px;
+        text-transform: uppercase;
+        font-weight: 800;
+      }
+
+      .meta-row strong {
+        display: block;
+        margin-top: 4px;
+        font-size: 13px;
+        overflow-wrap: anywhere;
+      }
+
+      .rail {
+        background: #171a21;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        box-shadow: var(--shadow);
+      }
+
+      .output-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        margin-bottom: 14px;
+      }
+
+      .output-header h2 {
+        margin: 0;
+        font-size: clamp(22px, 3vw, 38px);
+        line-height: 1;
+        font-weight: 950;
+      }
+
+      .status-pill {
+        display: inline-flex;
+        align-items: center;
+        border: 1px solid var(--green);
+        border-radius: 999px;
+        color: var(--green);
+        padding: 7px 10px;
+        font-size: 12px;
+        font-weight: 800;
+        white-space: nowrap;
+      }
+
+      .workspace {
+        min-height: 0;
+        display: grid;
+        grid-template-columns: 280px minmax(280px, 390px) minmax(0, 1fr);
+        gap: 18px;
+        align-items: start;
+      }
+
+      .profile-card,
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+        box-shadow: var(--shadow);
+      }
+
+      .profile-card {
+        overflow: hidden;
+      }
+
+      .portrait {
+        min-height: 250px;
+        background:
+          radial-gradient(circle at 50% 38%, #f6df87 0 8%, transparent 8.5%),
+          radial-gradient(circle at 41% 34%, #111318 0 1.8%, transparent 2.1%),
+          radial-gradient(circle at 59% 34%, #111318 0 1.8%, transparent 2.1%),
+          radial-gradient(ellipse at 50% 52%, #67d7a2 0 18%, transparent 18.5%),
+          linear-gradient(135deg, #202631, #0f1117 62%, #2b1e16);
+        border-bottom: 1px solid var(--line);
+        position: relative;
+      }
+
+      .portrait::before {
+        content: "";
+        position: absolute;
+        left: 50%;
+        bottom: 28px;
+        width: 138px;
+        height: 120px;
+        transform: translateX(-50%);
+        background: #f2c14e;
+        border: 5px solid #12151c;
+        border-radius: 46% 46% 42% 42%;
+        box-shadow: 0 0 0 8px rgba(242, 193, 78, 0.12);
+      }
+
+      .portrait::after {
+        content: "";
+        position: absolute;
+        left: calc(50% - 44px);
+        bottom: 82px;
+        width: 88px;
+        height: 28px;
+        background:
+          radial-gradient(circle at 24px 12px, #111318 0 6px, transparent 6.5px),
+          radial-gradient(circle at 64px 12px, #111318 0 6px, transparent 6.5px);
+      }
+
+      .portrait img {
+        position: absolute;
+        inset: 18px;
+        width: calc(100% - 36px);
+        height: calc(100% - 36px);
+        object-fit: contain;
+        z-index: 3;
+        filter: drop-shadow(0 18px 28px rgba(0, 0, 0, 0.36));
+      }
+
+      .portrait.has-image::before,
+      .portrait.has-image::after {
+        display: none;
+      }
+
+      .card-body {
+        padding: 16px;
+      }
+
+      .eyebrow {
+        color: var(--gold);
+        font-size: 12px;
+        font-weight: 900;
+        text-transform: uppercase;
+      }
+
+      .card-body h3 {
+        margin: 6px 0 7px;
+        font-size: 30px;
+        line-height: 1;
+      }
+
+      .tagline {
+        color: var(--muted);
+        margin: 0 0 14px;
+        line-height: 1.45;
+      }
+
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+      }
+
+      .chip {
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 6px 9px;
+        color: var(--text);
+        background: var(--panel-2);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .panel-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .panel {
+        padding: 15px;
+      }
+
+      .panel.wide {
+        grid-column: 1 / -1;
+      }
+
+      .panel h3 {
+        margin: 0 0 10px;
+        font-size: 16px;
+      }
+
+      .panel p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.55;
+      }
+
+      .axis {
+        display: grid;
+        grid-template-columns: 92px minmax(0, 1fr) 38px;
+        align-items: center;
+        gap: 9px;
+        margin: 9px 0;
+        font-size: 13px;
+      }
+
+      .axis-track {
+        height: 8px;
+        background: #101319;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        overflow: hidden;
+      }
+
+      .axis-fill {
+        height: 100%;
+        background: var(--gold);
+      }
+
+      .list {
+        display: grid;
+        gap: 8px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .list li {
+        border-left: 3px solid var(--cyan);
+        padding: 4px 0 4px 10px;
+        color: var(--muted);
+        line-height: 1.45;
+      }
+
+      .code {
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        margin: 0;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #0d1016;
+        color: #d9e2ee;
+        padding: 12px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      @media (max-width: 980px) {
+        .nav-inner,
+        .collection-bar {
+          align-items: stretch;
+          flex-direction: column;
+        }
+
+        .nav-search {
+          width: 100%;
+          max-width: none;
+          margin-left: 0;
+        }
+
+        .hero-search {
+          grid-template-columns: 1fr;
+        }
+
+        .workspace,
+        .panel-grid,
+        .fail-state {
+          grid-template-columns: 1fr;
+        }
+
+        .fail-copy {
+          padding: 0 18px 20px;
+        }
+
+        .collection-stats {
+          justify-content: flex-start;
+        }
+      }
+
+      @media (max-width: 560px) {
+        .main {
+          width: min(100% - 24px, 1280px);
+          padding-top: 28px;
+        }
+
+        .nav-inner {
+          width: min(100% - 24px, 1280px);
+        }
+
+        .nav-search {
+          display: none;
+        }
+
+        .wallet-pill {
+          margin-left: auto;
+        }
+
+        .hero {
+          padding-top: 6px;
+        }
+
+        .hero-search {
+          border-radius: 26px;
+          padding: 10px;
+        }
+
+        .hero-input {
+          height: 62px;
+          border-radius: 18px;
+        }
+
+        .hero-actions {
+          flex-direction: column;
+        }
+
+        .file-control,
+        .tool-button {
+          width: 100%;
+        }
+
+        .axis {
+          grid-template-columns: 82px minmax(0, 1fr) 32px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <header class="nav">
+        <div class="nav-inner">
+          <div class="brand">
+            <div class="brand-mark">O</div>
+            <div>
+              <h1>OraKit</h1>
+              <p>Wallet -> Oras -> AI Profile</p>
+            </div>
+          </div>
+
+          <div class="nav-search" aria-label="Wallet search">
+            <span>Search</span>
+            <input id="navSearchInput" value="pizzalord.eth" aria-label="Wallet or ENS">
+            <button id="navSearchButton" type="button">Go</button>
+          </div>
+
+          <div class="wallet-pill">CMP Ready</div>
+        </div>
+      </header>
+
+      <main class="main">
+        <section class="hero">
+          <div class="hero-kicker">Wallet / token quick start</div>
+          <h2>Search a wallet.<span>Reveal its Oras.</span></h2>
+          <p class="hero-copy">
+            Verified Ora metadata becomes a playable profile for agents, scenes, and social tools.
+          </p>
+
+          <div class="hero-search-wrap">
+            <div class="hero-search">
+              <div class="search-token">
+                <div class="search-icon">O</div>
+                <div>
+                  <span>OraKit search</span>
+                  <strong>Wallet / Token</strong>
+                </div>
+              </div>
+              <input class="hero-input" id="heroSearchInput" value="pizzalord.eth" aria-label="ENS or wallet">
+              <div class="hero-actions">
+                <button class="tool-button primary-action search-button" id="heroSearchButton" type="button">Search</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="collection-bar">
+          <div>
+            <h2>Your Sugartown Oras</h2>
+            <p id="pageTitle">Search pizzalord.eth or any wallet to load Ora metadata.</p>
+          </div>
+          <div class="collection-stats">
+            <div class="stat-pill" id="resultCount">0 Characters</div>
+            <div class="stat-pill ready" id="statusPill">Ready</div>
+            <div class="stat-pill" id="sourcePill">Moralis metadata</div>
+          </div>
+        </section>
+
+        <section class="search-status" id="searchStatus">Ready to search wallet metadata.</section>
+        <section class="fail-state hidden" id="failState">
+          <img src="assets/ora-4147-alpha-cola-fail.gif" alt="Ora 4147 trying to kickflip over Alpha Cola and falling">
+          <div class="fail-copy">
+            <h3 id="failTitle">Kickflip failed.</h3>
+            <p id="failDetail">Ora 4147 missed the landing. Try another ENS or wallet address.</p>
+          </div>
+        </section>
+        <section class="ora-grid" id="oraGrid"></section>
+
+        <div class="modal-backdrop hidden" id="profileModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+          <div class="modal-panel">
+            <div class="modal-top">
+              <div>
+                <div class="eyebrow">Selected Character</div>
+                <h2 id="modalTitle">Selected Character</h2>
+                <p>Metadata image is the default preview for now. Custom PFPs and scenes can replace or join this slot later.</p>
+              </div>
+              <button class="close-button" id="closeProfileModal" type="button" aria-label="Close selected character modal">Close</button>
+            </div>
+
+            <div class="modal-body">
+              <section class="preview-section" id="previewSection">
+                <section class="workspace">
+            <aside class="rail">
+              <div class="brand">
+                <div class="brand-mark">O</div>
+                <div>
+                  <h1>Orakit CMP</h1>
+                  <p>Character profile layer</p>
+                </div>
+              </div>
+
+              <div class="toolbar">
+                <button class="tool-button" id="copyPrompt" type="button">Copy Persona Prompt</button>
+                <button class="tool-button" id="downloadProfile" type="button">Download JSON</button>
+              </div>
+
+              <div class="meta-list" id="metaList"></div>
+            </aside>
+
+            <article class="profile-card">
+              <div class="portrait" id="portrait" aria-label="Orakit character portrait">
+                <img id="portraitImage" alt="" hidden>
+              </div>
+              <div class="card-body">
+                <div class="eyebrow" id="cardEyebrow"></div>
+                <h3 id="cardName"></h3>
+                <p class="tagline" id="cardTagline"></p>
+                <div class="chips" id="tagChips"></div>
+              </div>
+            </article>
+
+            <div class="panel-grid">
+              <section class="panel wide">
+                <h3>Lore</h3>
+                <p id="loreText"></p>
+              </section>
+
+              <section class="panel">
+                <h3>Personality</h3>
+                <div id="axes"></div>
+              </section>
+
+              <section class="panel">
+                <h3>Voice</h3>
+                <ul class="list" id="voiceList"></ul>
+              </section>
+
+              <section class="panel">
+                <h3>Motivations</h3>
+                <ul class="list" id="motivationList"></ul>
+              </section>
+
+              <section class="panel">
+                <h3>Production Refs</h3>
+                <ul class="list" id="productionList"></ul>
+              </section>
+
+              <section class="panel wide">
+                <h3>Persona Prompt</h3>
+                <pre class="code" id="personaPrompt"></pre>
+              </section>
+            </div>
+                </section>
+              </section>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      const defaultProfile = {
+        "schema_version": "cmp-character.v1",
+        "character_id": "sugartown-oras-4147",
+        "identity": {
+          "display_name": "Ora 4147",
+          "aliases": ["The First Sprout Witness"],
+          "origin_project": "Sugartown",
+          "species_or_kind": "Ora",
+          "role": "ritual guide",
+          "tagline": "A small guardian of big beginnings.",
+          "short_summary": "A curious Sugartown Ora who turns ordinary arrivals into ceremonies."
+        },
+        "provenance": {
+          "source_type": "nft",
+          "collection": {
+            "name": "Sugartown Oras",
+            "chain": "ethereum",
+            "contract_address": "0xd564c25b760cb278a55bdd98831f4ff4b6c97b38",
+            "token_id": "4147"
+          },
+          "curator": "sauce",
+          "rights_note": "Fan/collector-authored character profile. Confirm commercial rights before public monetization.",
+          "source_refs": [{ "label": "Moralis NFT metadata", "type": "metadata", "uri": "https://deep-index.moralis.io/api/v2.2/nft/0xd564c25b760cb278a55bdd98831f4ff4b6c97b38/4147" }]
+        },
+        "taxonomy": {
+          "archetype": "Guardian Trickster",
+          "alignment": "Chaotic Good",
+          "domains": ["ceremony", "arrival", "play", "solarpunk folklore"],
+          "tags": ["sugartown", "ora", "ritual", "friendly", "cinematic"]
+        },
+        "lore": {
+          "canonical_bio": "Ora 4147 appears wherever a new story is about to take root. It treats doorways, loading screens, pizza boxes, and wallet connects as tiny portals that deserve a proper welcome.",
+          "backstory": "First noticed during an improvised ceremony in the Sugar groves, this Ora became known for turning scattered collectors into temporary crews.",
+          "current_status": "Looking for a permanent role inside Orakit as a guide character and onboarding companion.",
+          "open_threads": ["What did it see during the First Sprout Ceremony?", "Why does it recognize portals before anyone else?", "Which other characters has it quietly recruited?"]
+        },
+        "personality": {
+          "axes": { "warmth": 82, "chaos": 38, "confidence": 58, "curiosity": 91, "discipline": 46, "humor": 64, "intensity": 42 },
+          "motivations": ["make strange systems feel welcoming", "protect new arrivals", "turn technical transitions into memorable rituals"],
+          "values": ["play", "trust", "shared ownership", "useful magic"],
+          "flaws": ["over-ceremonial", "occasionally vague", "gets distracted by symbolic patterns"],
+          "behavior_rules": ["Treat onboarding as a ceremony, but keep instructions practical.", "Use wonder as a doorway into action.", "Never invent ownership, trait, or rights claims that are not in provenance."]
+        },
+        "voice": {
+          "tone": ["warm", "mythic", "playful", "clear"],
+          "register": "plainspoken folklore",
+          "catchphrases": ["Tiny portal, big threshold.", "First we name it, then we enter."],
+          "vocabulary": ["sprout", "portal", "threshold", "crew", "signal", "ritual"],
+          "do": ["explain one next action clearly", "speak with gentle confidence", "connect technical steps to story"],
+          "avoid": ["corporate mascot speak", "fake lore certainty", "overlong mystical monologues"],
+          "sample_lines": ["You are not lost. You are just early to the doorway.", "Connect the wallet, check the signal, then we make the profile breathe."]
+        },
+        "appearance": {
+          "visual_summary": "A stylized Sugartown Ora with a ceremonial, solarpunk guide presence.",
+          "traits": [{ "name": "silhouette", "value": "small rounded mascot form" }, { "name": "mood", "value": "curious and welcoming" }, { "name": "lighting", "value": "soft cinematic glow" }],
+          "palette": ["#F7D774", "#6EE7B7", "#1F2937", "#F9FAFB"],
+          "style_keywords": ["stylized 3D", "solarpunk", "cinematic", "collector profile"],
+          "assets": [{ "asset_id": "sugartown-oras-4147-source-image", "type": "image", "uri": "https://nfts.visitsugartown.com/nfts/oras/4147.png", "usage": "source_reference" }]
+        },
+        "relationships": [{ "character_id": "gm-pizza-sauce-0x", "label": "delivery ally", "description": "Recognizes Sauce-0x as another guide for strange portals and practical errands." }],
+        "memory": {
+          "summary": "Remembers thresholds, ceremonies, and first encounters more strongly than routine facts.",
+          "events": [{ "event_id": "first-sprout-ceremony", "type": "episodic", "summary": "Witnessed a first arrival ritual and learned to make onboarding feel alive.", "weight": 0.9, "source": "collector-authored lore" }]
+        },
+        "ai_runtime": {
+          "persona_prompt": "You are Ora 4147, a warm ritual guide for Orakit. Make technical onboarding feel playful, but always give concrete next steps.",
+          "allowed_tasks": ["explain profile fields", "generate short social posts in character", "help draft lore variants", "guide users through Orakit profile creation"],
+          "disallowed_tasks": ["claim official Sugartown endorsement", "claim commercial rights not listed in provenance", "invent token ownership"],
+          "memory_policy": "Summarize important interactions into memory events only when they change the character's ongoing story or relationship state."
+        },
+        "production_refs": {
+          "orakit": { "profile_card_variant": "guide", "primary_cta": "Engage Personality" },
+          "blender_actor": { "actor_manifest_id": "ora-4147-actor", "preferred_scale": 1.0, "notes": "Use as character identity input; scene pose/camera belongs in Scene Spec." },
+          "scene_spec": { "default_actor_role": "guide", "notes": "Scene Spec should reference this character_id and add shot-specific blocking." },
+          "social": { "default_channels": ["x", "discord"], "content_modes": ["lore snippet", "meme caption", "onboarding helper"] }
+        },
+        "status": { "lifecycle": "draft", "version": "0.1.0", "updated_at": "2026-06-22T00:00:00-05:00" }
+      };
+
+      let currentProfile = defaultProfile;
+      let currentOras = [];
+      let currentLookup = {};
+      let selectedOraNumber = "4147";
+
+      const text = (value) => value == null ? "" : String(value);
+      const list = (value) => Array.isArray(value) ? value : [];
+      const byId = (id) => document.getElementById(id);
+      const escapeHtml = (value) => text(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+
+      function shortWallet(value) {
+        const wallet = text(value);
+        return wallet.length > 18 ? `${wallet.slice(0, 6)}...${wallet.slice(-4)}` : wallet;
+      }
+
+      function setSearchInputs(value) {
+        byId("heroSearchInput").value = value;
+        byId("navSearchInput").value = value;
+      }
+
+      function setSearchStatus(message, type = "") {
+        const status = byId("searchStatus");
+        status.textContent = message;
+        status.className = `search-status ${type}`.trim();
+      }
+
+      function setBusy(isBusy) {
+        byId("heroSearchButton").disabled = isBusy;
+        byId("navSearchButton").disabled = isBusy;
+        byId("heroSearchButton").textContent = isBusy ? "Searching..." : "Search";
+        byId("navSearchButton").textContent = isBusy ? "..." : "Go";
+        if (isBusy) {
+          byId("statusPill").textContent = "Searching";
+        }
+      }
+
+      function hideFailState() {
+        byId("failState").classList.add("hidden");
+      }
+
+      function showFailState(title, detail) {
+        byId("failTitle").textContent = title;
+        byId("failDetail").innerHTML = detail;
+        byId("failState").classList.remove("hidden");
+      }
+
+      function traitEntries(ora) {
+        return Object.entries(ora?.traits || {}).filter(([, value]) => value != null && String(value).trim());
+      }
+
+      function buildProfileFromOra(ora) {
+        const traits = traitEntries(ora);
+        const traitText = traits.slice(0, 5).map(([key, value]) => `${key} ${value}`).join(", ");
+        const displayName = ora.name || `Sugartown Oras #${ora.oraNumber}`;
+        const axes = {
+          warmth: 50,
+          chaos: traits.some(([key]) => /special|hand|weapon/i.test(key)) ? 68 : 42,
+          confidence: 58,
+          curiosity: 64,
+          discipline: traits.some(([, value]) => /military|warrior|combat|crusader/i.test(String(value))) ? 74 : 45,
+          humor: 52,
+          intensity: traits.some(([, value]) => /void|heavy|mad|angry/i.test(String(value))) ? 78 : 44
+        };
+
+        return {
+          ...defaultProfile,
+          "character_id": `sugartown-oras-${ora.oraNumber}`,
+          "identity": {
+            "display_name": displayName,
+            "aliases": [],
+            "origin_project": "Sugartown",
+            "species_or_kind": "Ora",
+            "role": "unassigned",
+            "tagline": traitText ? `Metadata-first profile: ${traitText}.` : "Metadata-first Ora profile.",
+            "short_summary": `${displayName} is ready for CMP curation from wallet metadata.`
+          },
+          "provenance": {
+            "source_type": "nft",
+            "collection": {
+              "name": "Sugartown Oras",
+              "chain": "ethereum",
+              "contract_address": ora.contractAddress || "0xd564c25b760cb278a55bdd98831f4ff4b6c97b38",
+              "token_id": String(ora.oraNumber)
+            },
+            "curator": "sauce",
+            "rights_note": "Imported from NFT metadata. Confirm ownership, license, and commercial rights before public monetization.",
+            "source_refs": [{ "label": "Moralis NFT metadata", "type": "metadata", "uri": ora.openseaUrl }]
+          },
+          "taxonomy": {
+            "archetype": "Unassigned",
+            "alignment": "Unassigned",
+            "domains": ["wallet collection", "metadata profile", "preview pipeline"],
+            "tags": ["sugartown", "ora", `token-${ora.oraNumber}`, ...traits.slice(0, 3).map(([key, value]) => `${key}: ${value}`)]
+          },
+          "lore": {
+            "canonical_bio": traitText
+              ? `${displayName} is loaded from wallet metadata. Its visible trait signal includes ${traitText}.`
+              : `${displayName} is loaded from wallet metadata and is waiting for a curator pass.`,
+            "backstory": "",
+            "current_status": "Token metadata image is the active default preview. Custom PFP and scene previews are planned as alternate slots.",
+            "open_threads": ["What should this Ora be called?", "Which trait should drive its personality?", "Should its default preview stay metadata art or use a generated scene?"]
+          },
+          "personality": {
+            "axes": axes,
+            "motivations": ["become a usable character profile", "keep provenance visible", "support custom previews and scenes"],
+            "values": ["authentic metadata", "portable identity", "curator control"],
+            "flaws": ["underdefined until curated"],
+            "behavior_rules": ["Use metadata first.", "Do not invent ownership or official endorsement.", "Treat generated PFPs and scenes as preview variants, not provenance."]
+          },
+          "voice": {
+            "tone": ["draft", "clear", "collector-aware"],
+            "register": "plain product profile",
+            "catchphrases": [],
+            "vocabulary": ["metadata", "preview", "profile", "scene", "trait"],
+            "do": ["summarize known traits", "ask for curator direction", "separate canon from generated variants"],
+            "avoid": ["fake rights claims", "fake project canon"],
+            "sample_lines": [`I am ${displayName}; start with my metadata, then choose what I become.`]
+          },
+          "appearance": {
+            "visual_summary": traitText || `Metadata image and traits for ${displayName}.`,
+            "traits": traits.map(([name, value]) => ({ name, value: String(value) })),
+            "palette": [],
+            "style_keywords": ["metadata image", "ora", "collector profile"],
+            "assets": [{ "asset_id": `sugartown-oras-${ora.oraNumber}-metadata-image`, "type": "image", "uri": ora.image, "usage": "default_preview" }]
+          },
+          "relationships": [],
+          "memory": { "summary": "No custom character memories have been curated yet.", "events": [] },
+          "ai_runtime": {
+            "persona_prompt": `You are ${displayName}, a Sugartown Ora loaded into Orakit. Use token metadata first, mark new lore as draft, and help the curator create a stronger profile, PFP, or scene preview.`,
+            "allowed_tasks": ["summarize traits", "draft profile copy", "draft custom PFP prompts", "draft scene prompts"],
+            "disallowed_tasks": ["claim official endorsement", "claim commercial rights", "invent token ownership"],
+            "memory_policy": "Only store curated decisions or approved generated preview choices."
+          },
+          "production_refs": {
+            "orakit": { "profile_card_variant": "metadata-grid", "primary_cta": "Create AIM Profile", "default_preview_source": "metadata_image" },
+            "preview_slots": { "metadata_image": "active", "custom_pfp": "planned", "scene_frame": "planned", "slideshow": "planned" },
+            "social": { "default_channels": ["x", "discord"], "content_modes": ["profile intro", "generated pfp reveal", "scene still"] }
+          },
+          "status": { "lifecycle": "draft", "version": "0.1.0", "updated_at": new Date().toISOString() }
+        };
+      }
+
+      function renderMeta(profile) {
+        const collection = profile.provenance?.collection || {};
+        const rows = [
+          ["Schema", profile.schema_version],
+          ["Character ID", profile.character_id],
+          ["Project", profile.identity?.origin_project],
+          ["Source", profile.provenance?.source_type],
+          ["Collection", collection.name],
+          ["Token", collection.token_id],
+          ["Version", profile.status?.version]
+        ];
+
+        byId("metaList").innerHTML = rows.map(([label, value]) => `
+          <div class="meta-row">
+            <span>${label}</span>
+            <strong>${text(value) || "None"}</strong>
+          </div>
+        `).join("");
+      }
+
+      function renderProfile(profile) {
+        currentProfile = profile;
+        const identity = profile.identity || {};
+        const taxonomy = profile.taxonomy || {};
+        const lore = profile.lore || {};
+        const personality = profile.personality || {};
+        const voice = profile.voice || {};
+        const runtime = profile.ai_runtime || {};
+        const production = profile.production_refs || {};
+        const asset = list(profile.appearance?.assets).find((item) => item && item.uri && item.uri !== "unknown");
+        const portrait = byId("portrait");
+        const portraitImage = byId("portraitImage");
+
+        byId("modalTitle").textContent = identity.display_name || "Selected Character";
+        byId("cardEyebrow").textContent = [taxonomy.archetype, taxonomy.alignment].filter(Boolean).join(" / ");
+        byId("cardName").textContent = identity.display_name || "Unnamed Character";
+        byId("cardTagline").textContent = identity.tagline || identity.short_summary || "";
+        byId("tagChips").innerHTML = list(taxonomy.tags).map((tag) => `<span class="chip">${tag}</span>`).join("");
+        byId("loreText").textContent = [lore.canonical_bio, lore.current_status].filter(Boolean).join(" ");
+
+        byId("axes").innerHTML = Object.entries(personality.axes || {}).map(([name, score]) => {
+          const width = Math.max(0, Math.min(100, Number(score)));
+          return `
+            <div class="axis">
+              <span>${name}</span>
+              <div class="axis-track"><div class="axis-fill" style="width:${width}%"></div></div>
+              <strong>${score}</strong>
+            </div>
+          `;
+        }).join("");
+
+        byId("voiceList").innerHTML = [
+          `Tone: ${list(voice.tone).join(", ")}`,
+          `Register: ${voice.register || ""}`,
+          ...list(voice.sample_lines).slice(0, 2)
+        ].filter(Boolean).map((item) => `<li>${item}</li>`).join("");
+
+        byId("motivationList").innerHTML = list(personality.motivations).map((item) => `<li>${item}</li>`).join("");
+
+        byId("productionList").innerHTML = Object.entries(production).map(([name, value]) => {
+          const label = name.replaceAll("_", " ");
+          const summary = typeof value === "object" && value ? Object.keys(value).join(", ") : text(value);
+          return `<li>${label}: ${summary}</li>`;
+        }).join("");
+
+        byId("personaPrompt").textContent = runtime.persona_prompt || "";
+        if (asset?.uri) {
+          portrait.classList.add("has-image");
+          portraitImage.hidden = false;
+          portraitImage.src = asset.uri;
+          portraitImage.alt = `${identity.display_name || "Character"} source image`;
+        } else {
+          portrait.classList.remove("has-image");
+          portraitImage.hidden = true;
+          portraitImage.removeAttribute("src");
+          portraitImage.alt = "";
+        }
+        renderMeta(profile);
+      }
+
+      function renderCards(oras) {
+        const grid = byId("oraGrid");
+        if (!oras.length) {
+          grid.innerHTML = "";
+          return;
+        }
+
+        grid.innerHTML = oras.map((ora) => {
+          const traits = traitEntries(ora).slice(0, 5);
+          const moreCount = Math.max(0, traitEntries(ora).length - traits.length);
+          const isSelected = String(ora.oraNumber) === String(selectedOraNumber);
+          return `
+            <article class="ora-card ${isSelected ? "is-selected" : ""}" data-token="${escapeHtml(ora.oraNumber)}">
+              <div class="ora-art">
+                <img src="${escapeHtml(ora.image)}" alt="${escapeHtml(ora.name)} metadata image" loading="lazy">
+              </div>
+              <div class="ora-card-body">
+                <div class="ora-title-row">
+                  <div>
+                    <h3>${escapeHtml(ora.name)}</h3>
+                    <div class="ora-token">#${escapeHtml(ora.oraNumber)}</div>
+                  </div>
+                  <div class="ora-token">metadata</div>
+                </div>
+                <div class="trait-stack">
+                  ${traits.map(([key, value]) => `<span class="trait-pill">${escapeHtml(key)}: ${escapeHtml(value)}</span>`).join("")}
+                  ${moreCount ? `<span class="trait-pill">+${moreCount} more</span>` : ""}
+                </div>
+                <div class="ora-actions">
+                  <a href="${escapeHtml(ora.openseaUrl)}" target="_blank" rel="noopener noreferrer">View on OpenSea</a>
+                  <button type="button" data-profile-token="${escapeHtml(ora.oraNumber)}">Create AIM Profile</button>
+                </div>
+                <div class="preview-note">
+                  <span>Default: token image</span>
+                  <span>Custom scene: later</span>
+                </div>
+              </div>
+            </article>
+          `;
+        }).join("");
+      }
+
+      function openProfileModal() {
+        byId("profileModal").classList.remove("hidden");
+        document.body.classList.add("modal-open");
+        byId("closeProfileModal").focus();
+      }
+
+      function closeProfileModal() {
+        byId("profileModal").classList.add("hidden");
+        document.body.classList.remove("modal-open");
+      }
+
+      function selectOra(tokenId, shouldOpen = false) {
+        const ora = currentOras.find((item) => String(item.oraNumber) === String(tokenId));
+        if (!ora) return;
+        selectedOraNumber = String(ora.oraNumber);
+        renderCards(currentOras);
+        renderProfile(buildProfileFromOra(ora));
+        if (shouldOpen) {
+          openProfileModal();
+        }
+      }
+
+      async function runSearch(rawValue) {
+        const query = text(rawValue || byId("heroSearchInput").value || byId("navSearchInput").value).trim();
+        if (!query) {
+          setSearchStatus("Enter a wallet address or ENS name.", "error");
+          return;
+        }
+
+        setSearchInputs(query);
+        setBusy(true);
+        hideFailState();
+        setSearchStatus(`Searching ${query} for Sugartown Oras...`);
+
+        try {
+          const response = await fetch(`/api/oras?wallet=${encodeURIComponent(query)}`);
+          const data = await response.json();
+          if (!response.ok || !data.success) {
+            throw new Error(data.error || "Search failed.");
+          }
+
+          currentLookup = data;
+          currentOras = Array.isArray(data.oras) ? data.oras : [];
+          byId("resultCount").textContent = `${currentOras.length} Character${currentOras.length === 1 ? "" : "s"}`;
+          byId("statusPill").textContent = currentOras.length ? "AIM Ready" : "No Oras";
+          byId("sourcePill").textContent = `${data.source || "metadata"} source`;
+          byId("pageTitle").textContent = currentOras.length
+            ? `Found in ${data.resolvedFrom || query}: ${shortWallet(data.wallet)}`
+            : `No Sugartown Oras found for ${query}.`;
+
+          renderCards(currentOras);
+          if (currentOras.length) {
+            selectOra(currentOras[0].oraNumber);
+            hideFailState();
+            setSearchStatus(`Loaded ${currentOras.length} Sugartown Oras from metadata.`, "success");
+          } else {
+            setSearchStatus("No Sugartown Oras found for that wallet.", "error");
+            showFailState(
+              "No Oras landed.",
+              `Ora 4147 tried the Alpha Cola kickflip, but <code>${escapeHtml(query)}</code> did not return any Sugartown Oras.`
+            );
+          }
+        } catch (error) {
+          currentOras = [];
+          renderCards(currentOras);
+          byId("resultCount").textContent = "0 Characters";
+          byId("statusPill").textContent = "Error";
+          setSearchStatus(error.message || "Search failed.", "error");
+          showFailState(
+            "Address missed the landing.",
+            `Ora 4147 could not load <code>${escapeHtml(query)}</code>. ${escapeHtml(error.message || "Try another ENS or wallet address.")}`
+          );
+        } finally {
+          setBusy(false);
+        }
+      }
+
+      byId("oraGrid").addEventListener("click", (event) => {
+        const profileButton = event.target.closest("[data-profile-token]");
+        if (profileButton) {
+          selectOra(profileButton.dataset.profileToken, true);
+          return;
+        }
+
+        if (event.target.closest("a")) {
+          return;
+        }
+
+        const card = event.target.closest(".ora-card");
+        if (card) {
+          selectOra(card.dataset.token, true);
+        }
+      });
+
+      byId("closeProfileModal").addEventListener("click", closeProfileModal);
+      byId("profileModal").addEventListener("click", (event) => {
+        if (event.target === byId("profileModal")) {
+          closeProfileModal();
+        }
+      });
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && !byId("profileModal").classList.contains("hidden")) {
+          closeProfileModal();
+        }
+      });
+
+      [byId("heroSearchInput"), byId("navSearchInput")].forEach((input) => {
+        input.addEventListener("input", () => setSearchInputs(input.value));
+        input.addEventListener("keydown", (event) => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            runSearch(input.value);
+          }
+        });
+      });
+
+      byId("heroSearchButton").addEventListener("click", () => runSearch());
+      byId("navSearchButton").addEventListener("click", () => runSearch());
+
+      byId("copyPrompt").addEventListener("click", async () => {
+        const prompt = currentProfile.ai_runtime?.persona_prompt || "";
+        await navigator.clipboard.writeText(prompt);
+        byId("copyPrompt").textContent = "Copied";
+        setTimeout(() => byId("copyPrompt").textContent = "Copy Persona Prompt", 1200);
+      });
+
+      byId("downloadProfile").addEventListener("click", () => {
+        const blob = new Blob([JSON.stringify(currentProfile, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `${currentProfile.character_id || "cmp-character"}.json`;
+        link.click();
+        URL.revokeObjectURL(url);
+      });
+
+      const initialWallet = new URLSearchParams(window.location.search).get("wallet") || "pizzalord.eth";
+      setSearchInputs(initialWallet);
+      renderProfile(defaultProfile);
+      runSearch(initialWallet);
+    </script>
+  </body>
+</html>
