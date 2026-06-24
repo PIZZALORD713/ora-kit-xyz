@@ -28,7 +28,7 @@ Set `MORALIS_API_KEY` in `.env` before searching live wallets. The server also s
 
 ## Deploy To Vercel
 
-The root `index.html` is served as the static app, and `api/oras.py` runs the Moralis-backed Ora lookup as a Vercel Python Function.
+The root `index.html` is served as the static app, and `api/oras.js` runs the Moralis-backed Ora lookup as a Vercel Function.
 
 Set `MORALIS_API_KEY` in the Vercel project for Production and Preview before deploying.
 
