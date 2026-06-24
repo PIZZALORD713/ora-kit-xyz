@@ -1,0 +1,8 @@
+local_server.py
+generate_404_gif.py
+polish_404_gif.py
+requirements-dev.txt
+__pycache__/
+*.pyc
+tmp/
+output/

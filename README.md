@@ -53,3 +53,5 @@ python3 -m pip install -r requirements-dev.txt
 ## Notes
 
 API keys stay server-side and are read from local env files only. Do not commit `.env`.
+
+The local Python tooling is ignored by Vercel through `.vercelignore`; production uses the static app and `api/oras.js`.
