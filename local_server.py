@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Local Orakit preview server with a small Moralis-backed Ora search API."""
+"""Local OraKit preview server with a small Moralis-backed Ora search API."""
 
 from __future__ import annotations
 

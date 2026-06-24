@@ -7,7 +7,7 @@ OraKit XYZ is a local preview for turning Sugartown Ora wallet metadata into a c
 ```bash
 python3 -m pip install -r requirements.txt
 cp .env.example .env
-python3 server.py
+python3 local_server.py
 ```
 
 Then open:
