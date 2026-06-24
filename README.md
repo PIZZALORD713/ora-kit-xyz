@@ -27,6 +27,12 @@ Set `MORALIS_API_KEY` in `.env` before searching live wallets. The server also s
 - selected-character modal with lore, persona prompt, and schema export
 - custom animated Ora 4147 Alpha Cola 404/error state
 
+## Deploy To Vercel
+
+The root `index.html` is served as the static app, and `api/oras.py` runs the Moralis-backed Ora lookup as a Vercel Python Function.
+
+Set `MORALIS_API_KEY` in the Vercel project for Production and Preview before deploying.
+
 ## Image Asset Workflow
 
 The live error animation is:
