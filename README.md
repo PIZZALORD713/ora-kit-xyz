@@ -5,7 +5,6 @@ OraKit XYZ is a local preview for turning Sugartown Ora wallet metadata into a c
 ## Quick Start
 
 ```bash
-python3 -m pip install -r requirements.txt
 cp .env.example .env
 python3 local_server.py
 ```
@@ -44,6 +43,12 @@ assets/ora-4147-alpha-cola-fail.gif
 `generate_404_gif.py` creates the rough local version with Pillow. `polish_404_gif.py` can build a reference board, use a GPT Image sprite sheet, and retime the result into the directed loop.
 
 The polished OpenAI step expects an `OPENAI_API_KEY` and an image-generation CLI path via `IMAGE_GEN_CLI`, or the default Codex imagegen CLI location under `~/.codex`.
+
+Install the asset-generation dependencies only when regenerating local GIF/image assets:
+
+```bash
+python3 -m pip install -r requirements-dev.txt
+```
 
 ## Notes
 
